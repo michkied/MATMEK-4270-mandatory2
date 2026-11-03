@@ -51,7 +51,9 @@ def map_true_domain(x, d, r):
     return d[0] + (d[1] - d[0]) * (x - r[0]) / (r[1] - r[0])
 
 
-def map_expression_true_domain(u: sp.Basic, x: sp.Symbol, d: Domain, r: Domain) -> sp.Basic:
+def map_expression_true_domain(
+    u: sp.Basic, x: sp.Symbol, d: Domain, r: Domain
+) -> sp.Basic:
     """Rewrite the sympy expression u(x), given on domain d, in terms of the reference domain r."""
     if d != r:
         u = sp.sympify(u)
@@ -102,7 +104,9 @@ class FunctionSpace(ABC):
     @overload
     def basis_function(self, j: int, sympy: Literal[True]) -> sp.Expr: ...
     @overload
-    def basis_function(self, j: int, sympy: Literal[False] = False) -> BasisCallable: ...
+    def basis_function(
+        self, j: int, sympy: Literal[False] = False
+    ) -> BasisCallable: ...
     @abstractmethod
     def basis_function(self, j, sympy=False): ...
 
@@ -154,7 +158,7 @@ class Polynomial(FunctionSpace):
 
     @property
     def reference_domain(self) -> Domain:
-        raise NotImplementedError
+        return (-1, 1)
 
     @overload
     def basis_function(self, j: int, sympy: Literal[True]) -> sp.Expr: ...
@@ -275,7 +279,9 @@ class Sines(Trigonometric):
     @overload
     def basis_function(self, j: int, sympy: Literal[True]) -> sp.Expr: ...
     @overload
-    def basis_function(self, j: int, sympy: Literal[False] = False) -> BasisCallable: ...
+    def basis_function(
+        self, j: int, sympy: Literal[False] = False
+    ) -> BasisCallable: ...
     def basis_function(self, j, sympy=False):
         if sympy:
             return sp.sin((j + 1) * sp.pi * x)
@@ -301,7 +307,9 @@ class Cosines(Trigonometric):
     @overload
     def basis_function(self, j: int, sympy: Literal[True]) -> sp.Expr: ...
     @overload
-    def basis_function(self, j: int, sympy: Literal[False] = False) -> BasisCallable: ...
+    def basis_function(
+        self, j: int, sympy: Literal[False] = False
+    ) -> BasisCallable: ...
     def basis_function(self, j, sympy=False):
         raise NotImplementedError
 
@@ -403,7 +411,7 @@ class DirichletLegendre(Composite, Legendre):
     def __init__(self, N: int, domain: Domain = (-1, 1), bc: BC = (0, 0)) -> None:
         Legendre.__init__(self, N, domain=domain)
         self.B = Dirichlet(bc, domain, self.reference_domain)
-        self.S = sparse.diags((1., -1.), (0, 2), shape=(N + 1, N + 3), format="csr")
+        self.S = sparse.diags((1.0, -1.0), (0, 2), shape=(N + 1, N + 3), format="csr")
 
     @overload
     def basis_function(self, j: int, sympy: Literal[True]) -> sp.Expr: ...
@@ -431,7 +439,7 @@ class DirichletChebyshev(Composite, Chebyshev):
     def __init__(self, N: int, domain: Domain = (-1, 1), bc: BC = (0, 0)) -> None:
         Chebyshev.__init__(self, N, domain=domain)
         self.B = Dirichlet(bc, domain, self.reference_domain)
-        self.S = sparse.diags((1., -1.), (0, 2), shape=(N + 1, N + 3), format="csr")
+        self.S = sparse.diags((1.0, -1.0), (0, 2), shape=(N + 1, N + 3), format="csr")
 
     @overload
     def basis_function(self, j: int | sp.Symbol, sympy: Literal[True]) -> sp.Expr: ...
@@ -539,7 +547,9 @@ def project(ue: sp.Expr, V: FunctionSpace) -> np.ndarray:
     return uh
 
 
-def L2_error(uh: np.ndarray, ue: sp.Expr, V: FunctionSpace, kind: str = "norm") -> float:
+def L2_error(
+    uh: np.ndarray, ue: sp.Expr, V: FunctionSpace, kind: str = "norm"
+) -> float:
     """L2 norm of the error between the numerical solution V.eval(uh, .) and the exact expression ue."""
     d = V.domain
     uej = sp.lambdify(x, ue)
